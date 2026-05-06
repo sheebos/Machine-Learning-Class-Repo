@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WM811K Wafer Defect Model Results</title>
+  <title>Wafer Map Defect Recognition | WM811K Analysis</title>
   <style>
     :root {
       --ink: #17202a;
@@ -14,6 +14,7 @@
       --accent-2: #0b6e4f;
       --warn: #9a3412;
       --paper: #ffffff;
+      --shadow: 0 14px 30px rgba(23, 32, 42, .08);
     }
     * { box-sizing: border-box; }
     body {
@@ -25,32 +26,53 @@
     }
     header {
       border-bottom: 1px solid var(--line);
-      background: #f6f8fb;
+      background:
+        linear-gradient(90deg, rgba(35, 100, 170, .08), rgba(11, 110, 79, .08)),
+        #f6f8fb;
     }
     .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 22px; }
-    .hero { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, .8fr); gap: 28px; align-items: end; }
-    h1 { margin: 0 0 10px; font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1.05; letter-spacing: 0; }
-    h2 { margin: 0 0 14px; font-size: 1.35rem; letter-spacing: 0; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(260px, .65fr); gap: 24px; align-items: end; padding-top: 42px; padding-bottom: 36px; }
+    .title-kicker { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 24px; color: var(--accent); font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .title-kicker::before { content: ""; width: 28px; height: 3px; background: var(--accent-2); border-radius: 999px; }
+    .title-row { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+    .title-stack { display: inline-flex; flex-direction: column; align-items: center; }
+    .wafer-mark { flex: 0 0 auto; display: grid; grid-template-columns: repeat(5, 9px); gap: 4px; padding: 12px; border: 1px solid rgba(35, 100, 170, .22); border-radius: 8px; background: rgba(255, 255, 255, .72); box-shadow: 0 10px 22px rgba(23, 32, 42, .08); }
+    .wafer-mark span { width: 9px; height: 9px; border-radius: 2px; background: #d7dee8; }
+    .wafer-mark span:nth-child(4), .wafer-mark span:nth-child(8), .wafer-mark span:nth-child(13), .wafer-mark span:nth-child(18), .wafer-mark span:nth-child(22) { background: var(--accent); }
+    .wafer-mark span:nth-child(7), .wafer-mark span:nth-child(12), .wafer-mark span:nth-child(17) { background: var(--accent-2); }
+    h1 { margin: 0; font-size: clamp(2.25rem, 4.2vw, 3.7rem); line-height: 1; letter-spacing: 0; max-width: none; white-space: nowrap; }
+    .hero-title { grid-column: 1; grid-row: 1; }
+    .hero-details { grid-column: 1; grid-row: 3; }
+    .title-rule { width: 100%; height: 5px; margin: 8px 0 24px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); grid-column: 1 / -1; grid-row: 2; }
+    h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 1.35rem; letter-spacing: 0; }
+    h2::before { content: ""; width: 10px; height: 28px; border-radius: 999px; background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
     h3 { margin: 0 0 8px; font-size: 1rem; letter-spacing: 0; }
     p { margin: 0 0 14px; }
-    .presenters-title { margin: 0 0 14px; font-size: 1.3rem; font-weight: 800; color: var(--accent-2); }
+    .presenters-title { margin: 0 0 2px; font-size: 1.3rem; font-weight: 800; color: var(--accent-2); }
+    .department-title { margin: 0 0 16px; color: var(--muted); font-size: 1rem; font-weight: 700; }
     .lede { color: var(--muted); font-size: 1.05rem; max-width: 760px; }
     .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-    .pill { border: 1px solid var(--line); background: #fff; padding: 7px 10px; border-radius: 999px; font-size: .88rem; color: var(--muted); }
-    nav { border-bottom: 1px solid var(--line); background: #fff; }
-    .nav-links { display: flex; flex-wrap: wrap; gap: 14px; padding-top: 12px; padding-bottom: 12px; }
+    .pill { border: 1px solid rgba(35, 100, 170, .18); background: rgba(255, 255, 255, .82); padding: 7px 10px; border-radius: 999px; font-size: .88rem; color: var(--muted); box-shadow: 0 6px 14px rgba(23, 32, 42, .04); }
+    nav { position: sticky; top: 0; z-index: 5; border-bottom: 1px solid var(--line); background: rgba(255, 255, 255, .92); backdrop-filter: blur(10px); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
     a { color: var(--accent); font-weight: 700; text-decoration: none; }
     a:hover { text-decoration: underline; }
+    .nav-links a { padding: 6px 10px; border-radius: 999px; color: #29465f; font-size: .92rem; }
+    .nav-links a:hover { background: #eef5fb; color: var(--accent); text-decoration: none; }
     .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .metric { border-left: 4px solid var(--accent); padding: 12px 14px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+    .hero > .metric-grid { grid-column: 2; grid-row: 3; align-self: start; margin-top: 8px; }
+    .metric { position: relative; overflow: hidden; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 13px 14px; background: #fff; box-shadow: var(--shadow); }
+    .metric::after { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, rgba(35, 100, 170, .4), rgba(11, 110, 79, .4)); }
     .metric strong { display: block; font-size: 1.45rem; line-height: 1.1; }
     .metric span { color: var(--muted); font-size: .88rem; }
     section { border-bottom: 1px solid var(--line); }
+    section:nth-of-type(even) { background: #fbfcfe; }
     .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-    .result { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: var(--panel); }
+    .result { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: #fff; box-shadow: var(--shadow); }
+    .result::before, .connection-card::before, .detail-panel::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: .82; }
     .result strong { display: block; font-size: 1.8rem; color: var(--accent-2); }
     .result small { color: var(--muted); }
-    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: var(--shadow); }
     table { width: 100%; border-collapse: collapse; font-size: .95rem; }
     th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
     th { background: #eef3f8; color: #283747; font-weight: 700; }
@@ -58,21 +80,33 @@
     .dataframe { border: 0 !important; }
     .dataframe thead th { text-align: left !important; }
     .dataframe tbody th { color: var(--muted); width: 44px; }
-    pre { margin: 0; overflow-x: auto; white-space: pre; padding: 16px; background: #101820; color: #e7edf5; border-radius: 8px; font-size: .9rem; }
+    pre { margin: 0; overflow-x: auto; white-space: pre; padding: 16px; background: #101820; color: #e7edf5; border-radius: 8px; font-size: .9rem; box-shadow: var(--shadow); }
     .split { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 18px; align-items: start; }
     .plots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-    .plot-card { margin: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+    .plot-card { margin: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease; }
+    .plot-card:hover, .connection-card:hover, .detail-panel:hover, .result:hover { transform: translateY(-2px); box-shadow: 0 18px 36px rgba(23, 32, 42, .11); }
     .plot-card img { display: block; width: 100%; height: auto; background: #fff; }
     figcaption { display: grid; gap: 2px; padding: 12px 14px; border-top: 1px solid var(--line); }
     figcaption span { color: var(--muted); font-size: .9rem; }
-    .note { border-left: 4px solid var(--warn); padding: 12px 14px; background: #fff7ed; color: #4a2b16; }
-    .connections { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .note { border: 1px solid #fed7aa; border-left: 4px solid var(--warn); border-radius: 8px; padding: 12px 14px; background: #fff7ed; color: #4a2b16; }
+    .connections { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
     .connections.two-up { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .connection-card { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: var(--panel); }
+    .connection-card { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: #fff; box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease; }
     .connection-card p { color: var(--muted); font-size: .95rem; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .detail-panel { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; padding: 20px 18px 18px; background: #fff; box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease; }
+    .detail-panel ul { margin: 0; padding-left: 20px; color: var(--muted); }
+    .detail-panel li { margin: 7px 0; }
     @media (max-width: 820px) {
-      .hero, .split, .plots, .summary-grid, .connections { grid-template-columns: 1fr; }
+      .hero, .split, .plots, .summary-grid, .connections, .detail-grid { grid-template-columns: 1fr; }
+      .hero-title, .hero-details, .hero > .metric-grid, .title-rule { grid-column: 1; grid-row: auto; }
       .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .title-row { align-items: flex-start; gap: 12px; }
+      .title-stack { align-items: flex-start; }
+      .title-rule { width: 100%; margin: 18px 0 32px; }
+      h1 { white-space: normal; }
+      .wafer-mark { grid-template-columns: repeat(5, 7px); gap: 3px; padding: 9px; }
+      .wafer-mark span { width: 7px; height: 7px; }
       .wrap { padding: 22px 16px; }
     }
   </style>
@@ -80,10 +114,26 @@
 <body>
   <header>
     <div class="wrap hero">
-      <div>
-        <h1>WM811K Wafer Defect Model Results</h1>
+      <div class="hero-title">
+        <div class="title-kicker">IECE 465 Introduction to Machine Learning for Engineers</div>
+        <div class="title-row">
+          <div class="wafer-mark" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <div class="title-stack">
+            <h1>Wafer Map Defect Recognition</h1>
+          </div>
+        </div>
+      </div>
+      <div class="title-rule"></div>
+      <div class="hero-details">
         <div class="presenters-title">Presented by Meghan Herbert and Najani Johnson</div>
-        <p class="lede">Standalone summary generated from the executed outputs in <code>test2.ipynb</code>. The notebook preprocesses wafer maps, compares a Random Forest baseline against two CNN variants, and visualizes model behavior on the test set.</p>
+        <div class="department-title">Electrical and Comptuter Engineering Department</div>
+        <p class="lede">WM811K analysis of semiconductor wafer failure patterns using classical machine learning and convolutional neural networks. This report summarizes the executed outputs in <code>test2.ipynb</code>, including preprocessing, model comparison, and visual evaluation.</p>
         <div class="meta">
           <span class="pill">Dataset: WM811K wafer defect maps</span>
           <span class="pill">Input size: 26 x 26 x 1</span>
@@ -105,6 +155,8 @@
       <a href="#plots">Plots</a>
       <a href="#connections">Connections</a>
       <a href="#background">Background</a>
+      <a href="#approach">Approach</a>
+      <a href="#next-steps">Next Steps</a>
       <a href="#references">References</a>
       <a href="https://github.com/sheebos/Machine-Learning-Class-Repo">GitHub Repository</a>
       <a href="https://www.kaggle.com/datasets/qingyi/wm811k-wafer-map">Kaggle Dataset</a>
@@ -130,6 +182,11 @@
           <p>Background for wafer map failure pattern recognition and similarity ranking.</p>
           <a href="https://doi.org/10.1109/TSM.2014.2364237">doi.org/10.1109/TSM.2014.2364237</a>
         </div>
+        <div class="connection-card">
+          <h3>Showcase Poster</h3>
+          <p>Showcase poster presented at UAlbany Showcase 2026, summarizing the dataset, Random Forest baseline, CNN model, takeaways, and references.</p>
+          <a href="Machine%20Learning%20Poster.pdf">Machine Learning Poster.pdf</a>
+        </div>
       </div>
     </div>
   </section>
@@ -143,6 +200,46 @@
     </div>
   </section>
 
+  <section id="approach">
+    <div class="wrap">
+      <h2>Project Approach</h2>
+      <div class="detail-grid">
+        <div class="detail-panel">
+          <h3>Why Defect Detection Matters</h3>
+          <ul>
+            <li>Semiconductor wafers contain thousands of individual dies.</li>
+            <li>Defects lower manufacturing yield and can point to process or equipment issues.</li>
+            <li>Manual wafer inspection is slow and expensive, so machine learning can help automate pattern recognition.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Dataset Preparation</h3>
+          <ul>
+            <li>The WM811K dataset contains about 811,000 wafer maps collected from semiconductor manufacturing.</li>
+            <li>Each wafer is represented as a 2D grid where values describe die status.</li>
+            <li>The analysis uses labeled wafer maps and focuses on nine classes: none, Edge-Ring, Edge-Loc, Center, Loc, Scratch, Random, Donut, and Near-full.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Random Forest Baseline</h3>
+          <ul>
+            <li>Wafer maps are flattened into 1D feature vectors before training.</li>
+            <li>The baseline uses 100 trees and provides a reference point for CNN performance.</li>
+            <li>It performs well on dominant classes but cannot directly learn spatial image features.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>CNN Model</h3>
+          <ul>
+            <li>CNNs treat wafer maps as image-like inputs and learn spatial relationships between failing dies.</li>
+            <li>The notebook standardizes maps to 26 x 26 images before CNN training.</li>
+            <li>Training curves, confusion matrices, and sample predictions are used to inspect model behavior.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="results">
     <div class="wrap">
       <h2>Model Comparison</h2>
@@ -152,6 +249,7 @@
         <div class="result"><h3>CNN Improved</h3><strong>0.9299</strong><small>accuracy, 0.9371 weighted F1</small></div>
       </div>
       <p class="note" style="margin-top:16px;">The old CNN is the strongest model in this notebook run by both accuracy and weighted F1. The Random Forest is close in accuracy, while the improved CNN underperforms on the final test metrics despite using batch normalization, dropout, and early stopping.</p>
+      <p class="note" style="margin-top:12px;">The presentation and poster emphasize a broader modeling lesson: CNNs can learn meaningful wafer-map structure, but validation behavior shows the need to manage overfitting and class imbalance carefully. Some visually similar defect patterns are still difficult to separate reliably.</p>
       <div class="table-wrap" style="margin-top:16px;"><div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -267,6 +365,46 @@ weighted avg       0.96      0.96      0.95     14842</pre>
     <div class="wrap">
       <h2>Processing Flow</h2>
       <p>The notebook loads wafer map data from CSV, converts map strings into numeric arrays, cleans label fields, removes unlabeled rows, validates maps, resizes maps to a uniform 26 by 26 grid, label-encodes defect categories, and evaluates model predictions using accuracy, weighted F1, classification reports, confusion matrices, and example wafer-map predictions.</p>
+    </div>
+  </section>
+
+  <section id="next-steps">
+    <div class="wrap">
+      <h2>Next Steps</h2>
+      <div class="detail-grid">
+        <div class="detail-panel">
+          <h3>Improve CNN Generalization</h3>
+          <ul>
+            <li>Use early stopping to stop training before validation loss rises.</li>
+            <li>Add or tune regularization methods such as dropout layers.</li>
+            <li>Reduce unnecessary model complexity if the network begins memorizing training wafers.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Address Class Imbalance</h3>
+          <ul>
+            <li>Use class weighting during training so rare defect categories matter more.</li>
+            <li>Oversample rare defect cases or use augmentation where appropriate.</li>
+            <li>Track per-class recall and F1 score instead of relying only on total accuracy.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Expand Evaluation</h3>
+          <ul>
+            <li>Compare additional CNN architectures and hyperparameter settings.</li>
+            <li>Review mistakes between visually similar defect patterns.</li>
+            <li>Use similarity ranking ideas from the base research paper to support model interpretation.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Presentation Takeaway</h3>
+          <ul>
+            <li>Machine learning can automate wafer defect classification and reduce dependence on manual inspection.</li>
+            <li>Random Forest gives a strong baseline, while CNNs are better matched to spatial wafer-map patterns.</li>
+            <li>The most important challenge is building a model that generalizes across imbalanced and visually similar defect classes.</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 

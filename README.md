@@ -9,6 +9,8 @@ Presented by Meghan Herbert and Najani Johnson.
 - Project repository: https://github.com/sheebos/Machine-Learning-Class-Repo
 - Dataset: https://www.kaggle.com/datasets/qingyi/wm811k-wafer-map
 - HTML results report: `WM811K_data_and_analysis/test2_results.html`
+- Presentation: `WM811K_data_and_analysis/Wafer Map Defect Classification Presentation.pdf`
+- Poster: `WM811K_data_and_analysis/Machine Learning Poster.pdf`
 
 ## Background
 
@@ -32,6 +34,8 @@ The dataset is challenging because it is highly imbalanced. Most labeled wafers 
     |-- pickelopener.ipynb
     |-- pickelopener2.ipynb
     |-- pickelopener_Najanimods.ipynb
+    |-- Machine Learning Poster.pdf
+    |-- Wafer Map Defect Classification Presentation.pdf
     |-- test2.ipynb
     |-- test2_results.html
     `-- test3.ipynb
@@ -43,6 +47,8 @@ The dataset is challenging because it is highly imbalanced. Most labeled wafers 
 - `WM811K_data_and_analysis/test2.ipynb`: Main analysis notebook using a CSV export of the WM811K data. It preprocesses wafer map strings, cleans labels, resizes wafer maps to `26 x 26`, trains/evaluates a Random Forest baseline and CNN models, and creates comparison plots.
 - `WM811K_data_and_analysis/test2_results.html`: Standalone HTML report generated from the results in `test2.ipynb`. It includes model metrics, dataset summary, links, presenter information, and embedded plots.
 - `WM811K_data_and_analysis/test3.ipynb`: Alternate CNN-focused notebook. It includes environment setup help for the local virtual environment and skips the Random Forest baseline to reduce dependency issues.
+- `WM811K_data_and_analysis/Wafer Map Defect Classification Presentation.pdf`: Slide deck covering the project motivation, dataset overview, preprocessing, model implementation, results, overfitting observations, and next steps.
+- `WM811K_data_and_analysis/Machine Learning Poster.pdf`: Poster summary of the background, wafer map dataset, Random Forest baseline, CNN model, key takeaways, and references.
 - `WM811K_data_and_analysis/pickel.py`: Small script for opening `LSWMD.pkl` with pandas and checking dataset information.
 - `WM811K_data_and_analysis/pickelopener*.ipynb`: Utility notebooks for opening and visualizing wafer map data from `.npz` or pickle-derived files.
 - `WM811K_data_and_analysis/wm811k_metadata.csv`: Metadata-only CSV containing fields such as die size, lot name, wafer index, train/test label, and failure type.
@@ -85,6 +91,15 @@ The notebooks follow this general workflow:
 8. Train and compare Random Forest and CNN models.
 9. Evaluate models using accuracy, weighted F1 score, classification reports, confusion matrices, and example wafer predictions.
 
+## Model Approach
+
+The presentation and poster frame the project around two model types:
+
+- Random Forest baseline: wafer maps are flattened into 1D feature vectors and trained with a 100-tree Random Forest. This gives a strong traditional machine learning comparison point, but it does not directly learn spatial relationships in the wafer image.
+- Convolutional Neural Network: wafer maps are treated like small images, allowing the model to learn spatial patterns such as rings, scratches, clusters, and localized failures.
+
+This comparison is important because wafer defects are not only tabular labels; their location and shape across the wafer are part of the signal.
+
 ## Results Summary
 
 The generated `test2_results.html` report summarizes the executed `test2.ipynb` run. In that run:
@@ -97,6 +112,23 @@ The generated `test2_results.html` report summarizes the executed `test2.ipynb` 
 - Improved CNN accuracy: `0.9299`
 
 The old CNN had the best overall score in the reported run, with `0.9635` accuracy and `0.9631` weighted F1 score.
+
+The presentation and poster also emphasize that training behavior matters beyond final accuracy. The CNN training curves show signs of overfitting: training loss can continue decreasing while validation loss rises. This suggests the model begins memorizing training wafer patterns instead of learning general defect structures.
+
+## Key Takeaways
+
+- Machine learning can help automate wafer defect classification and reduce manual inspection effort.
+- Random Forest performs strongly as a baseline, especially for common classes.
+- CNNs are a natural fit for wafer maps because they can learn image-like spatial defect patterns.
+- Class imbalance is a major challenge because rare defect types have far fewer examples than the `none` class.
+- Visually similar patterns can still be confused, so confusion matrices and sample predictions are important for interpretation.
+
+## Next Steps
+
+- Improve CNN generalization with early stopping, dropout, and other regularization methods.
+- Address class imbalance using class weighting, oversampling rare classes, or carefully designed augmentation.
+- Expand evaluation with more CNN architectures, hyperparameter tuning, and closer review of misclassified defect types.
+- Explore similarity ranking ideas from the base research paper to compare visually similar wafer maps.
 
 ## Setup
 
