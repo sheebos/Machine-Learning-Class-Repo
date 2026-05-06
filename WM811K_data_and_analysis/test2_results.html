@@ -104,6 +104,8 @@
       <a href="#results">Results</a>
       <a href="#plots">Plots</a>
       <a href="#connections">Connections</a>
+      <a href="#background">Background</a>
+      <a href="#references">References</a>
       <a href="https://github.com/sheebos/Machine-Learning-Class-Repo">GitHub Repository</a>
       <a href="https://www.kaggle.com/datasets/qingyi/wm811k-wafer-map">Kaggle Dataset</a>
     </div>
@@ -112,7 +114,7 @@
   <section id="connections">
     <div class="wrap">
       <h2>Connections</h2>
-      <div class="connections two-up">
+      <div class="connections">
         <div class="connection-card">
           <h3>Project Repository</h3>
           <p>The code, notebooks, and project materials are hosted in the Machine Learning Class repository.</p>
@@ -123,7 +125,21 @@
           <p>The wafer map data comes from the WM811K Wafer Map dataset on Kaggle.</p>
           <a href="https://www.kaggle.com/datasets/qingyi/wm811k-wafer-map">kaggle.com/datasets/qingyi/wm811k-wafer-map</a>
         </div>
+        <div class="connection-card">
+          <h3>Base Research Paper</h3>
+          <p>Background for wafer map failure pattern recognition and similarity ranking.</p>
+          <a href="https://doi.org/10.1109/TSM.2014.2364237">doi.org/10.1109/TSM.2014.2364237</a>
+        </div>
       </div>
+    </div>
+  </section>
+
+  <section id="background">
+    <div class="wrap">
+      <h2>Background</h2>
+      <p>Wafer maps are spatial records of semiconductor test results. Each location on a map corresponds to a die on the wafer, and the pattern of passing and failing dies can reveal clues about process problems, equipment drift, contamination, edge effects, scratches, or other manufacturing issues.</p>
+      <p>Wu, Jang, and Chen describe wafer map failure pattern recognition as a useful tool for identifying failure causes and supporting large-scale semiconductor manufacturing analysis. Their 2015 paper also connects the WM811K dataset to two related tasks: recognizing failure pattern classes and ranking visually similar wafer maps. This project builds on that background by treating wafer maps as image-like arrays and comparing classical machine learning with CNN-based models for defect classification.</p>
+      <p>The class imbalance visible in this dataset is important: most labeled wafers belong to the <code>none</code> category, while several defect patterns have far fewer examples. This imbalance helps explain why accuracy alone can be misleading and why weighted F1 score, confusion matrices, and per-class reports are included in the results.</p>
     </div>
   </section>
 
@@ -251,6 +267,13 @@ weighted avg       0.96      0.96      0.95     14842</pre>
     <div class="wrap">
       <h2>Processing Flow</h2>
       <p>The notebook loads wafer map data from CSV, converts map strings into numeric arrays, cleans label fields, removes unlabeled rows, validates maps, resizes maps to a uniform 26 by 26 grid, label-encodes defect categories, and evaluates model predictions using accuracy, weighted F1, classification reports, confusion matrices, and example wafer-map predictions.</p>
+    </div>
+  </section>
+
+  <section id="references">
+    <div class="wrap">
+      <h2>References</h2>
+      <p>Wu, Ming-Ju, Jyh-Shing R. Jang, and Jui-Long Chen. "Wafer Map Failure Pattern Recognition and Similarity Ranking for Large-Scale Data Sets." <em>IEEE Transactions on Semiconductor Manufacturing</em> 28, no. 1 (February 2015): 1-12. DOI: <a href="https://doi.org/10.1109/TSM.2014.2364237">10.1109/TSM.2014.2364237</a>.</p>
     </div>
   </section>
 

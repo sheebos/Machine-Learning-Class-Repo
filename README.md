@@ -10,6 +10,14 @@ Presented by Meghan Herbert and Najani Johnson.
 - Dataset: https://www.kaggle.com/datasets/qingyi/wm811k-wafer-map
 - HTML results report: `WM811K_data_and_analysis/test2_results.html`
 
+## Background
+
+Semiconductor wafers are tested across many die locations, and those test outcomes can be represented as wafer maps. The spatial layout of failing dies is meaningful: different shapes and regions of failure can point toward different manufacturing problems, such as edge effects, localized process variation, scratches, contamination, or equipment issues.
+
+Wu, Jang, and Chen describe wafer map failure pattern recognition as a way to help engineers identify likely failure causes in large-scale semiconductor manufacturing data. Their work also frames two related analysis goals: recognizing known wafer failure pattern classes and ranking wafer maps by similarity. This project follows the same general motivation by using the WM811K wafer map dataset to classify defect patterns from the wafer map structure.
+
+The dataset is challenging because it is highly imbalanced. Most labeled wafers are marked as `none`, while several defect classes have much smaller sample counts. Because of that imbalance, this project reports not only accuracy but also weighted F1 score, classification reports, confusion matrices, and example predictions.
+
 ## Project Contents
 
 ```text
@@ -111,3 +119,7 @@ Then open the notebooks in Jupyter or VS Code.
 Some notebooks contain absolute local paths such as `X:/ECEsite/Machine-Learning-Class-Repo/...`. If running this project on a different machine, update those paths or run notebooks from the repository root and use relative paths.
 
 TensorFlow on native Windows may run on CPU depending on the installed TensorFlow version. The notebook outputs include a warning that TensorFlow GPU support is not available on native Windows for TensorFlow versions `2.11` and newer.
+
+## Reference
+
+Wu, Ming-Ju, Jyh-Shing R. Jang, and Jui-Long Chen. "Wafer Map Failure Pattern Recognition and Similarity Ranking for Large-Scale Data Sets." *IEEE Transactions on Semiconductor Manufacturing* 28, no. 1 (February 2015): 1-12. https://doi.org/10.1109/TSM.2014.2364237.
