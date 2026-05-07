@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wafer Map Defect Recognition | WM811K Analysis</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5d6d7e;
+      --line: #d7dee8;
+      --panel: #f8fafc;
+      --accent: #2364aa;
+      --accent-2: #0b6e4f;
+      --warn: #9a3412;
+      --paper: #ffffff;
+      --shadow: 0 14px 30px rgba(23, 32, 42, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.55;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(35, 100, 170, .08), rgba(11, 110, 79, .08)),
+        #f6f8fb;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 22px; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(260px, .65fr); gap: 24px; align-items: end; padding-top: 42px; padding-bottom: 36px; }
+    .title-kicker { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 24px; color: var(--accent); font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .title-kicker::before { content: ""; width: 28px; height: 3px; background: var(--accent-2); border-radius: 999px; }
+    .title-row { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+    .title-stack { display: inline-flex; flex-direction: column; align-items: center; }
+    .wafer-mark { flex: 0 0 auto; display: grid; grid-template-columns: repeat(5, 9px); gap: 4px; padding: 12px; border: 1px solid rgba(35, 100, 170, .22); border-radius: 8px; background: rgba(255, 255, 255, .72); box-shadow: 0 10px 22px rgba(23, 32, 42, .08); }
+    .wafer-mark span { width: 9px; height: 9px; border-radius: 2px; background: #d7dee8; }
+    .wafer-mark span:nth-child(4), .wafer-mark span:nth-child(8), .wafer-mark span:nth-child(13), .wafer-mark span:nth-child(18), .wafer-mark span:nth-child(22) { background: var(--accent); }
+    .wafer-mark span:nth-child(7), .wafer-mark span:nth-child(12), .wafer-mark span:nth-child(17) { background: var(--accent-2); }
+    h1 { margin: 0; font-size: clamp(2.25rem, 4.2vw, 3.7rem); line-height: 1; letter-spacing: 0; max-width: none; white-space: nowrap; }
+    .hero-title { grid-column: 1; grid-row: 1; }
+    .hero-details { grid-column: 1; grid-row: 3; }
+    .title-rule { width: 100%; height: 5px; margin: 8px 0 24px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); grid-column: 1 / -1; grid-row: 2; }
+    h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 1.35rem; letter-spacing: 0; }
+    h2::before { content: ""; width: 10px; height: 28px; border-radius: 999px; background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+    h3 { margin: 0 0 8px; font-size: 1rem; letter-spacing: 0; }
+    p { margin: 0 0 14px; }
+    .presenters-title { margin: 0 0 2px; font-size: 1.3rem; font-weight: 800; color: var(--accent-2); }
+    .department-title { margin: 0 0 16px; color: var(--muted); font-size: 1rem; font-weight: 700; }
+    .lede { color: var(--muted); font-size: 1.05rem; max-width: 760px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .pill { border: 1px solid rgba(35, 100, 170, .18); background: rgba(255, 255, 255, .82); padding: 7px 10px; border-radius: 999px; font-size: .88rem; color: var(--muted); box-shadow: 0 6px 14px rgba(23, 32, 42, .04); }
+    nav { position: sticky; top: 0; z-index: 5; border-bottom: 1px solid var(--line); background: rgba(255, 255, 255, .92); backdrop-filter: blur(10px); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+    a { color: var(--accent); font-weight: 700; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .nav-links a { padding: 6px 10px; border-radius: 999px; color: #29465f; font-size: .92rem; }
+    .nav-links a:hover { background: #eef5fb; color: var(--accent); text-decoration: none; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .hero > .metric-grid { grid-column: 2; grid-row: 3; align-self: start; margin-top: 8px; }
+    .metric { position: relative; overflow: hidden; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 13px 14px; background: #fff; box-shadow: var(--shadow); }
+    .metric::after { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, rgba(35, 100, 170, .4), rgba(11, 110, 79, .4)); }
+    .metric strong { display: block; font-size: 1.45rem; line-height: 1.1; }
+    .metric span { color: var(--muted); font-size: .88rem; }
+    section { border-bottom: 1px solid var(--line); }
+    section:nth-of-type(even) { background: #fbfcfe; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .result { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: #fff; box-shadow: var(--shadow); }
+    .result::before, .connection-card::before, .detail-panel::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: .82; }
+    .result strong { display: block; font-size: 1.8rem; color: var(--accent-2); }
+    .result small { color: var(--muted); }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { background: #eef3f8; color: #283747; font-weight: 700; }
+    tr:last-child td, tr:last-child th { border-bottom: 0; }
+    pre { margin: 0; overflow-x: auto; white-space: pre; padding: 16px; background: #101820; color: #e7edf5; border-radius: 8px; font-size: .9rem; box-shadow: var(--shadow); }
+    .split { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 18px; align-items: start; }
+    .plots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .plot-card { margin: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease; }
+    .plot-card:hover, .connection-card:hover, .detail-panel:hover, .result:hover { transform: translateY(-2px); box-shadow: 0 18px 36px rgba(23, 32, 42, .11); }
+    .plot-card img { display: block; width: 100%; height: auto; background: #fff; }
+    figcaption { display: grid; gap: 2px; padding: 12px 14px; border-top: 1px solid var(--line); }
+    figcaption span { color: var(--muted); font-size: .9rem; }
+    .note { border: 1px solid #fed7aa; border-left: 4px solid var(--warn); border-radius: 8px; padding: 12px 14px; background: #fff7ed; color: #4a2b16; }
+    .connections { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .connection-card { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: #fff; box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease; }
+    .connection-card p { color: var(--muted); font-size: .95rem; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .detail-panel { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; padding: 20px 18px 18px; background: #fff; box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease; }
+    .detail-panel ul { margin: 0; padding-left: 20px; color: var(--muted); }
+    .detail-panel li { margin: 7px 0; }
+    @media (max-width: 820px) {
+      .hero, .split, .plots, .summary-grid, .connections, .detail-grid { grid-template-columns: 1fr; }
+      .hero-title, .hero-details, .hero > .metric-grid, .title-rule { grid-column: 1; grid-row: auto; }
+      .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .title-row { align-items: flex-start; gap: 12px; }
+      .title-stack { align-items: flex-start; }
+      .title-rule { width: 100%; margin: 18px 0 32px; }
+      h1 { white-space: normal; }
+      .wafer-mark { grid-template-columns: repeat(5, 7px); gap: 3px; padding: 9px; }
+      .wafer-mark span { width: 7px; height: 7px; }
+      .wrap { padding: 22px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap hero">
+      <div class="hero-title">
+        <div class="title-kicker">IECE 465 Introduction to Machine Learning for Engineers</div>
+        <div class="title-row">
+          <div class="wafer-mark" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <div class="title-stack">
+            <h1>Wafer Map Defect Recognition</h1>
+          </div>
+        </div>
+      </div>
+      <div class="title-rule"></div>
+      <div class="hero-details">
+        <div class="presenters-title">Presented by Meghan Herbert and Najani Johnson</div>
+        <div class="department-title">Electrical and Computer Engineering Department</div>
+        <p class="lede">WM811K analysis of semiconductor wafer failure patterns using classical machine learning and convolutional neural networks. This report summarizes the current executed outputs in <code>test2.ipynb</code>, including the updated preprocessing, model comparison, and visual evaluation.</p>
+        <div class="meta">
+          <span class="pill">Dataset: WM811K wafer defect maps</span>
+          <span class="pill">Input size: 26 x 26 x 1</span>
+          <span class="pill">Classes: 9 defect labels</span>
+        </div>
+      </div>
+      <div class="metric-grid">
+        <div class="metric"><strong>74,206</strong><span>processed wafer maps</span></div>
+        <div class="metric"><strong>14,842</strong><span>test samples</span></div>
+        <div class="metric"><strong>0.9666</strong><span>best accuracy, CNN Old</span></div>
+        <div class="metric"><strong>0.9669</strong><span>best weighted F1, CNN Old</span></div>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="wrap nav-links">
+      <a href="#results">Results</a>
+      <a href="#plots">Plots</a>
+      <a href="#current-improvements">Current Iteration</a>
+      <a href="#connections">Connections</a>
+      <a href="#background">Background</a>
+      <a href="#approach">Approach</a>
+      <a href="#next-steps">Next Steps</a>
+      <a href="#references">References</a>
+      <a href="https://github.com/sheebos/Machine-Learning-Class-Repo">GitHub Repository</a>
+      <a href="https://www.kaggle.com/datasets/qingyi/wm811k-wafer-map">Kaggle Dataset</a>
+    </div>
+  </nav>
+
+  <section id="connections">
+    <div class="wrap">
+      <h2>Connections</h2>
+      <div class="connections">
+        <div class="connection-card">
+          <h3>Project Repository</h3>
+          <p>The code, notebooks, and project materials are hosted in the Machine Learning Class repository.</p>
+          <a href="https://github.com/sheebos/Machine-Learning-Class-Repo">github.com/sheebos/Machine-Learning-Class-Repo</a>
+        </div>
+        <div class="connection-card">
+          <h3>Dataset</h3>
+          <p>The wafer map data comes from the WM811K Wafer Map dataset on Kaggle.</p>
+          <a href="https://www.kaggle.com/datasets/qingyi/wm811k-wafer-map">kaggle.com/datasets/qingyi/wm811k-wafer-map</a>
+        </div>
+        <div class="connection-card">
+          <h3>Base Research Paper</h3>
+          <p>Background for wafer map failure pattern recognition and similarity ranking.</p>
+          <a href="https://doi.org/10.1109/TSM.2014.2364237">doi.org/10.1109/TSM.2014.2364237</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="background">
+    <div class="wrap">
+      <h2>Background</h2>
+      <p>Wafer maps are spatial records of semiconductor test results. Each location on a map corresponds to a die on the wafer, and the pattern of passing and failing dies can reveal clues about process problems, equipment drift, contamination, edge effects, scratches, or other manufacturing issues.</p>
+      <p>Wu, Jang, and Chen describe wafer map failure pattern recognition as a useful tool for identifying failure causes and supporting large-scale semiconductor manufacturing analysis. This project builds on that background by treating wafer maps as image-like arrays and comparing a Random Forest baseline with CNN-based models for defect classification.</p>
+      <p>The class imbalance visible in this dataset is important: most labeled wafers belong to the <code>none</code> category, while several defect patterns have far fewer examples. This imbalance helps explain why accuracy alone can be misleading and why weighted F1 score, macro F1 score, confusion matrices, and per-class reports are included in the results.</p>
+    </div>
+  </section>
+
+  <section id="approach">
+    <div class="wrap">
+      <h2>Project Approach</h2>
+      <div class="detail-grid">
+        <div class="detail-panel">
+          <h3>Why Defect Detection Matters</h3>
+          <ul>
+            <li>Semiconductor wafers contain thousands of individual dies.</li>
+            <li>Defects lower manufacturing yield and can point to process or equipment issues.</li>
+            <li>Machine learning can help automate wafer-pattern recognition and reduce manual inspection time.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Dataset Preparation</h3>
+          <ul>
+            <li>The analysis uses labeled wafer maps from the WM811K dataset CSV export.</li>
+            <li>Each wafer is parsed, validated, and standardized to a uniform 26 x 26 map.</li>
+            <li>The current processed array shape is <code>(74206, 26, 26)</code>.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Random Forest Baseline</h3>
+          <ul>
+            <li>Wafer maps are flattened into 1D feature vectors before training.</li>
+            <li>The current run fixes the baseline so Random Forest uses the same train/test split as the CNN models.</li>
+            <li>It remains strong overall, but recall is lower for several rare classes.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>CNN Models</h3>
+          <ul>
+            <li>CNNs treat wafer maps as image-like inputs and learn spatial relationships between failing dies.</li>
+            <li>The current run normalizes inputs with <code>X.astype("float32") / 2.0</code>.</li>
+            <li>The improved CNN uses class weights, early stopping, and learning-rate reduction.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="wrap">
+      <h2>Model Comparison</h2>
+      <div class="summary-grid">
+        <div class="result"><h3>Random Forest</h3><strong>0.9586</strong><small>accuracy, 0.9483 weighted F1</small></div>
+        <div class="result"><h3>CNN Old</h3><strong>0.9666</strong><small>accuracy, 0.9669 weighted F1</small></div>
+        <div class="result"><h3>CNN Improved</h3><strong>0.9555</strong><small>accuracy, 0.9578 weighted F1</small></div>
+      </div>
+      <p class="note" style="margin-top:16px;">In the current <code>test2.ipynb</code> run, the old CNN is the strongest model by both accuracy and weighted F1. The improved CNN is more controlled during training because it uses class weights, early stopping, and learning-rate reduction, but its final test score is slightly lower than the old CNN in this run.</p>
+      <p class="note" style="margin-top:12px;">The current run keeps the cleaner pipeline changes: stratified splits, one consistent validation set, normalized CNN input values, a fixed Random Forest split, and no oversampling. Oversampling was tested but removed because it made the learning curves less stable for this iteration.</p>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Accuracy</th>
+              <th>F1 Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Random Forest</td>
+              <td>0.9586</td>
+              <td>0.9483</td>
+            </tr>
+            <tr>
+              <td>CNN (Old)</td>
+              <td>0.9666</td>
+              <td>0.9669</td>
+            </tr>
+            <tr>
+              <td>CNN (Improved)</td>
+              <td>0.9555</td>
+              <td>0.9578</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="current-improvements">
+    <div class="wrap">
+      <h2>Current Iteration Improvements</h2>
+      <p>This version keeps the same project goal and visual reporting format, but updates the results to match the current <code>test2.ipynb</code> iteration.</p>
+      <div class="summary-grid">
+        <div class="result"><h3>Cleaner Split</h3><strong>Stratified</strong><small>train, validation, and test sets preserve class proportions</small></div>
+        <div class="result"><h3>Stable Inputs</h3><strong>0 to 1</strong><small>CNN wafer arrays normalized from original map values</small></div>
+        <div class="result"><h3>Callback Control</h3><strong>Epoch 3</strong><small>improved CNN restored best validation-loss epoch</small></div>
+      </div>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Change</th>
+              <th>Current Notebook Choice</th>
+              <th>Why It Matters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Stratified splitting</td>
+              <td>Train, validation, and test sets keep class balance</td>
+              <td>Rare classes stay represented during training and evaluation.</td>
+            </tr>
+            <tr>
+              <td>Fixed validation set</td>
+              <td>Old and improved CNN use the same validation comparison</td>
+              <td>The training curves are easier to compare fairly.</td>
+            </tr>
+            <tr>
+              <td>Input normalization</td>
+              <td><code>X.astype("float32") / 2.0</code></td>
+              <td>CNN training is more numerically stable.</td>
+            </tr>
+            <tr>
+              <td>Random Forest alignment</td>
+              <td>Random Forest uses the same split as the CNN test set</td>
+              <td>Model scores are compared on the same samples.</td>
+            </tr>
+            <tr>
+              <td>Improved CNN callbacks</td>
+              <td>EarlyStopping and ReduceLROnPlateau</td>
+              <td>Training stops before the model drifts too far past its best validation loss.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="plots">
+    <div class="wrap split">
+      <div>
+        <h2>Dataset Labels</h2>
+        <p>The label distribution is highly imbalanced, with the <code>none</code> class dominating the available labeled samples.</p>
+        <pre>failureType
+none         147431
+Edge-Ring      9680
+Edge-Loc       5189
+Center         4294
+Loc            3593
+Scratch        1193
+Random          866
+Donut           555
+Near-full       149
+Name: count, dtype: int64</pre>
+      </div>
+      <div>
+        <h2>Random Forest Report</h2>
+        <p>This is the classification report printed in the notebook for the current Random Forest evaluation.</p>
+        <pre>precision    recall  f1-score   support
+
+           0       0.98      0.88      0.93       545
+           1       1.00      0.20      0.33         5
+           2       0.74      0.39      0.51       328
+           3       0.93      0.40      0.56       100
+           4       0.68      0.10      0.17       214
+           5       1.00      0.94      0.97        18
+           6       1.00      0.33      0.49        49
+           7       0.80      0.13      0.23        60
+           8       0.96      1.00      0.98     13523
+
+    accuracy                           0.96     14842
+   macro avg       0.90      0.49      0.57     14842
+weighted avg       0.95      0.96      0.95     14842</pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Current Test2 Notebook Plots</h2>
+      <div class="plots">
+        <figure class="plot-card">
+          <img src="website_assets/cnn_loss_curves.png" alt="Current test2 notebook training and validation loss comparison for the old and improved CNN models.">
+          <figcaption><strong>CNN Loss Curves</strong><span>Current notebook training and validation loss comparison for the old and improved CNN models.</span></figcaption>
+        </figure>
+        <figure class="plot-card">
+          <img src="website_assets/cnn_accuracy_curves.png" alt="Current test2 notebook training and validation accuracy comparison for the old and improved CNN models.">
+          <figcaption><strong>CNN Accuracy Curves</strong><span>Current notebook training and validation accuracy comparison for the old and improved CNN models.</span></figcaption>
+        </figure>
+        <figure class="plot-card">
+          <img src="website_assets/confusion_matrices.png" alt="Current test2 notebook confusion matrices for Random Forest and improved CNN models.">
+          <figcaption><strong>Confusion Matrices</strong><span>Current notebook confusion matrices for the Random Forest and improved CNN models.</span></figcaption>
+        </figure>
+        <figure class="plot-card">
+          <img src="website_assets/prediction_examples.png" alt="Current test2 notebook example CNN predictions on wafer maps.">
+          <figcaption><strong>Prediction Examples</strong><span>Current notebook example CNN predictions on wafer maps.</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Processing Flow</h2>
+      <p>The current notebook loads the WM811K CSV export, parses wafer-map strings, cleans label fields, removes unlabeled rows, validates maps, resizes maps to a uniform 26 by 26 grid, label-encodes defect categories, creates stratified train/test/validation splits, normalizes CNN inputs, trains Random Forest and CNN models, and evaluates predictions using accuracy, weighted F1, classification reports, confusion matrices, learning curves, and example wafer-map predictions.</p>
+    </div>
+  </section>
+
+  <section id="next-steps">
+    <div class="wrap">
+      <h2>Next Steps</h2>
+      <div class="detail-grid">
+        <div class="detail-panel">
+          <h3>Improve CNN Generalization</h3>
+          <ul>
+            <li>Keep early stopping so training stops before validation performance weakens.</li>
+            <li>Try smaller regularization changes before adding more model complexity.</li>
+            <li>Compare the old and improved CNN on the same split to avoid misleading curve differences.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Address Class Imbalance</h3>
+          <ul>
+            <li>Continue using class weighting so rare defect categories contribute more during training.</li>
+            <li>Use oversampling carefully, because the tested oversampling version made curves less stable.</li>
+            <li>Track macro F1 and per-class recall instead of relying only on total accuracy.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Expand Evaluation</h3>
+          <ul>
+            <li>Review mistakes between visually similar defect patterns.</li>
+            <li>Add normalized confusion matrices to compare class-level behavior more clearly.</li>
+            <li>Use similarity ranking ideas from the base research paper to support model interpretation.</li>
+          </ul>
+        </div>
+        <div class="detail-panel">
+          <h3>Presentation Takeaway</h3>
+          <ul>
+            <li>Machine learning can automate wafer defect classification and reduce dependence on manual inspection.</li>
+            <li>The old CNN gives the best current test score, while the improved CNN has a more controlled training setup.</li>
+            <li>The largest challenge remains generalizing across imbalanced and visually similar defect classes.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="references">
+    <div class="wrap">
+      <h2>References</h2>
+      <p>Wu, Ming-Ju, Jyh-Shing R. Jang, and Jui-Long Chen. "Wafer Map Failure Pattern Recognition and Similarity Ranking for Large-Scale Data Sets." <em>IEEE Transactions on Semiconductor Manufacturing</em> 28, no. 1 (February 2015): 1-12. DOI: <a href="https://doi.org/10.1109/TSM.2014.2364237">10.1109/TSM.2014.2364237</a>.</p>
+    </div>
+  </section>
+</body>
+</html>
